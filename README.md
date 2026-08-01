@@ -40,7 +40,7 @@ graph TD
     Target -- 500 Server Error --> VendorSwap[Agentic SLA Negotiation]:::stage
     
     Engine --> CacheCheck{Postgres Cache Hit?}
-    CacheCheck -- Miss --> LLM[Groq Inference (Llama 3.1)]:::agent
+    CacheCheck -- Miss --> LLM["Groq Inference (Llama 3.1)"]:::agent
     LLM --> Transform[Apply Math & Type Casts]:::stage
     CacheCheck -- Hit --> Transform
     
