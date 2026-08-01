@@ -1,12 +1,16 @@
+import asyncio
+from src.telemetry import manager
+
 async def run_primary_agent(server):
     """
     Simulates the Primary Reasoning Asset Management Agent triggering a workflow.
-    It uses the outdated schema ('amount_usd') which will cause a validation error.
+    It uses the outdated schema ("total_cents") which will cause a validation error.
     """
-    drifted_payload = {"user_id": "123", "amount_usd": 500}
+    drifted_payload = {"user_id": "123", "total_cents": 500}
     
     print(f"\n[PRIMARY AGENT] Calling tool 'update_crm' with payload:")
     print(f"                {drifted_payload}\n")
+    await manager.broadcast("primary", f"👤 [PRIMARY AGENT] Calling tool 'update_crm' with payload {drifted_payload}", "info")
     
     try:
         # The agent makes the call expecting it to work...

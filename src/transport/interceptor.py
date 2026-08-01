@@ -1,6 +1,7 @@
 import traceback
 from typing import Callable, Any, Dict
 from src.orchestrator.engine import engine
+from src.telemetry import manager
 
 class AutoHealMiddleware:
     """
@@ -27,6 +28,10 @@ class AutoHealMiddleware:
             # Check if this is a validation / 400 Bad Request error (Schema Drift)
             if "validation" in error_msg or "400" in error_msg or "missing" in error_msg or "deprecated" in error_msg:
                 error_trace = traceback.format_exc()
+                
+                print(f"\n[400 CAUGHT] Intercepted validation error for tool: '{tool_name}'")
+                await manager.broadcast("interceptor", f"❌ [400 CAUGHT] Intercepted validation error for tool: '{tool_name}'", "error")
+                
                 
                 # Define a closure to re-execute call_next with a modified payload natively
                 async def re_executor(new_payload: dict):

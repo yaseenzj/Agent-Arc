@@ -1,5 +1,10 @@
-import asyncio
-from fastapi import FastAPI, BackgroundTasks
+import sys
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding='utf-8')
+
+from fastapi import FastAPI, BackgroundTasks, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
+from src.telemetry import manager
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 import uvicorn
@@ -41,6 +46,15 @@ async def api_run_agent(background_tasks: BackgroundTasks):
 async def api_run_stress_test(background_tasks: BackgroundTasks):
     background_tasks.add_task(run_stress_test_agent, mcp_server)
     return {"status": "Stress Test agent dispatched. Check terminal logs."}
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

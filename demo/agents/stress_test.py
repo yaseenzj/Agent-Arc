@@ -1,4 +1,5 @@
 import asyncio
+from src.telemetry import manager
 
 async def run_stress_test_agent(server):
     """
@@ -16,6 +17,7 @@ async def run_stress_test_agent(server):
     
     async def attack(payload):
         print(f"👾 [STRESS TEST] Firing legacy payload: {payload}")
+        await manager.broadcast("gremlin", f"👾 [STRESS TEST] Firing legacy payload: {payload}", "error")
         try:
             await server.call_tool("update_crm", payload)
         except Exception as e:

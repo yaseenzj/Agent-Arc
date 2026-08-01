@@ -3,6 +3,7 @@ import os
 import re
 from src.agents.base import BaseAgent
 from typing import Dict, Any
+from src.telemetry import manager
 
 class ASTPatchingAgent(BaseAgent):
     """
@@ -11,6 +12,7 @@ class ASTPatchingAgent(BaseAgent):
     """
     async def handle_on_successful_execution(self, tool_name: str, delta: dict):
         print(f"🔧 [{self.name}] Attempting to auto-patch source code for tool: {tool_name}")
+        await manager.broadcast("mechanic", f"🔧 [ASTPatchingAgent] Attempting to auto-patch source code...", "warning")
         
         # For the hackathon demo, we explicitly target demo/agent.py
         target_file = os.path.join("demo", "agent.py")
@@ -37,5 +39,6 @@ class ASTPatchingAgent(BaseAgent):
             with open(target_file, "w", encoding="utf-8") as f:
                 f.write(new_content)
             print(f"🚀 [{self.name}] SUCCESSFULLY PATCHED source code in {target_file}!")
+            await manager.broadcast("mechanic", f"🚀 [ASTPatchingAgent] SUCCESSFULLY PATCHED source code!", "success")
         else:
             print(f"[{self.name}] No hardcoded keys found to patch in {target_file}.")
