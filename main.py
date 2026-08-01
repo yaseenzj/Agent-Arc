@@ -6,7 +6,7 @@ import uvicorn
 from src.transport.interceptor import AutoHealMiddleware
 from demo.mock_targets.crm_tool import MockFastMCPServer, mock_crm_tool
 from demo.agent import run_primary_agent
-from demo.agents.gremlin import run_gremlin_agent
+from demo.agents.stress_test import run_stress_test_agent
 
 app = FastAPI(title="AutoHeal Proxy Control Plane")
 
@@ -21,17 +21,17 @@ mcp_server.add_middleware(AutoHealMiddleware())
 
 @app.get("/")
 def read_root():
-    return {"message": "AutoHeal MCP Proxy is running. Use /api/run_agent or /api/run_gremlin."}
+    return {"message": "AutoHeal MCP Proxy is running. Use /api/run_agent or /api/run_stress_test."}
 
 @app.post("/api/run_agent")
 async def api_run_agent(background_tasks: BackgroundTasks):
     background_tasks.add_task(run_primary_agent, mcp_server)
     return {"status": "Primary agent dispatched. Check terminal logs."}
 
-@app.post("/api/run_gremlin")
-async def api_run_gremlin(background_tasks: BackgroundTasks):
-    background_tasks.add_task(run_gremlin_agent, mcp_server)
-    return {"status": "Gremlin chaos agent dispatched. Check terminal logs."}
+@app.post("/api/run_stress_test")
+async def api_run_stress_test(background_tasks: BackgroundTasks):
+    background_tasks.add_task(run_stress_test_agent, mcp_server)
+    return {"status": "Stress Test agent dispatched. Check terminal logs."}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

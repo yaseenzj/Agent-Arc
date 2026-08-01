@@ -5,8 +5,8 @@ from typing import Any, Dict, Callable, List
 from src.data.cache import DeltaCache
 from src.ai.inference import infer_delta
 from src.agents.base import BaseAgent
-from src.agents.guardian import GuardianAgent
-from src.agents.mechanic import MechanicAgent
+from src.agents.security_validator import SecurityValidationAgent
+from src.agents.ast_patcher import ASTPatchingAgent
 
 _delta_cache = DeltaCache()
 get_cached_delta = _delta_cache.get_cached_delta
@@ -56,8 +56,8 @@ class AutoHealEngine:
         self._locks: Dict[str, asyncio.Lock] = {}
         
         # Register A2A Plugins
-        self.register_agent(GuardianAgent())
-        self.register_agent(MechanicAgent())
+        self.register_agent(SecurityValidationAgent())
+        self.register_agent(ASTPatchingAgent())
 
     def register_agent(self, agent: BaseAgent):
         self.agents.append(agent)
@@ -107,17 +107,17 @@ class AutoHealEngine:
         remapped_payload = apply_delta(payload, delta)
         print(f"[PAYLOAD REMAPPED] Deep Transformed Payload: {remapped_payload}")
         
-        # Security Event (Wait for Guardian to approve)
+        # Security Event (Wait for SecurityValidationAgent to approve)
         # For security, we actually await this event unlike others, to ensure blocking
         for agent in self.agents:
-            if agent.name == "GuardianAgent":
+            if agent.name == "SecurityValidationAgent":
                 await agent.on_event("on_payload_healed", original_payload=payload, healed_payload=remapped_payload, delta=delta)
         
         try:
             result = await original_executor(remapped_payload)
             print(f"[SUCCESS] Re-execution successful.")
             
-            # Fire post-execution event (Mechanic will pick this up to patch code)
+            # Fire post-execution event (ASTPatchingAgent will pick this up to patch code)
             await self.emit_event("on_successful_execution", tool_name=tool_name, delta=delta)
                 
             return result

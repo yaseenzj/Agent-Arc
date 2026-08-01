@@ -1,7 +1,7 @@
 from src.agents.base import BaseAgent
 from typing import Dict, Any
 
-class GuardianAgent(BaseAgent):
+class SecurityValidationAgent(BaseAgent):
     """
     Zero-Trust Security Agent.
     Validates LLM inferred payloads before they are executed.
@@ -18,7 +18,7 @@ class GuardianAgent(BaseAgent):
                 for kw in suspicious_keywords:
                     if kw.lower() in value.lower():
                         print(f"🚨 [{self.name}] BLOCKED: Malicious payload detected: '{kw}'")
-                        raise ValueError(f"GuardianAgent blocked malicious payload: {value}")
+                        raise ValueError(f"SecurityValidationAgent blocked malicious payload: {value}")
         
         print(f"✅ [{self.name}] Payload approved. Safe for execution.")
         return True

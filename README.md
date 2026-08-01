@@ -13,11 +13,11 @@ An enterprise-grade, **Zero-Infrastructure Multi-Agent System** that intercepts 
 
 ## 🧠 The Agent Lineup
 
-1. **🛡️ The Guardian Agent (Zero-Trust Security)**
+1. **🛡️ The SecurityValidationAgent (Zero-Trust Security)**
    Intercepts the LLM's generated payload before it touches the target API. Scans for malicious injections (like SQL drops) and blocks unsafe executions.
-2. **🔧 The Mechanic Agent (AST Auto-Patching)**
+2. **🔧 The ASTPatchingAgent (AST Auto-Patching)**
    Once a payload is successfully healed and executed, this agent wakes up in the background, locates the original agent's source code on your hard drive, and literally rewrites the python file so the agent never makes the mistake again.
-3. **👾 The Gremlin Agent (Chaos Engineering)**
+3. **👾 The StressTestAgent (Chaos Engineering)**
    A stress-testing adversary agent. It bombards the FastMCP server with legacy schemas, weird data types, and broken JSON concurrently to visually demonstrate the AutoHeal proxy's locking resilience in live demos.
 
 ---
@@ -39,12 +39,12 @@ autoheal-proxy/
 │   │
 │   └── agents/                     # Plug-and-Play Sub-Agents
 │       ├── base.py                 # Event-driven Base Agent
-│       ├── guardian.py             # Zero-Trust Security Agent
-│       └── mechanic.py             # AST Auto-Patching Agent
+│       ├── security_validator.py   # Zero-Trust Security Agent
+│       └── ast_patcher.py          # AST Auto-Patching Agent
 │
 └── demo/
     ├── mock_targets/crm_tool.py    # Target Tool with intentional schema drift
-    └── agents/gremlin.py           # Chaos Engineering Attacker
+    └── agents/stress_test.py       # Chaos Engineering Attacker
 ```
 
 ---
@@ -69,18 +69,18 @@ graph TD
     LLM --> Transform[Apply Math & Type Casts]:::stage
     CacheCheck -- Hit --> Transform
     
-    Transform --> Guardian[Guardian Security Agent]:::agent
+    Transform --> Guardian[SecurityValidationAgent]:::agent
     
     Guardian --> Safe{Payload Safe?}
     Safe -- No --> Block([Block Execution]):::endpoint
     Safe -- Yes --> ReExecute([Re-execute Healed Payload]):::endpoint
     
     ReExecute -- 200 OK --> Primary
-    ReExecute -- Event: on_successful_execution --> Mechanic[Mechanic Patching Agent]:::agent
+    ReExecute -- Event: on_successful_execution --> Mechanic[ASTPatchingAgent]:::agent
     
     Mechanic --> Rewrite[(Rewrite agent.py on Disk)]:::db
     
-    Gremlin([👾 Chaos Gremlin Agent]) -. Concurrently Attacks .-> Interceptor
+    Gremlin([👾 Chaos StressTestAgent]) -. Concurrently Attacks .-> Interceptor
 ```
 
 ---
@@ -99,5 +99,5 @@ graph TD
 
 3. **Run the Demos via Swagger UI**
    - Open your browser to: `http://localhost:8000/docs`
-   - Click `POST /api/run_agent` -> **Try it out** -> **Execute**. (Watch your terminal as the Mechanic literally rewrites your files!)
-   - Click `POST /api/run_gremlin` -> **Try it out** -> **Execute**. (Watch the Chaos Engineering attack get blocked by the `asyncio.Lock` cache).
+   - Click `POST /api/run_agent` -> **Try it out** -> **Execute**. (Watch your terminal as the ASTPatchingAgent literally rewrites your files!)
+   - Click `POST /api/run_stress_test` -> **Try it out** -> **Execute**. (Watch the Chaos Engineering attack get blocked by the `asyncio.Lock` cache).
