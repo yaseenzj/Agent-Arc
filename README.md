@@ -23,6 +23,46 @@ An enterprise-grade, **Zero-Infrastructure Multi-Agent System** that intercepts 
 
 ---
 
+## 🕸️ The Neural Architecture (How it Works)
+
+```mermaid
+graph TD
+    %% Styling
+    classDef stage fill:#2d3748,stroke:#4a5568,stroke-width:2px,color:#fff
+    classDef db fill:#2c5282,stroke:#4299e1,stroke-width:2px,color:#fff
+    classDef agent fill:#276749,stroke:#48bb78,stroke-width:2px,color:#fff
+    classDef endpoint fill:#742a2a,stroke:#fc8181,stroke-width:2px,color:#fff
+    
+    Primary([ Primary Agent]) --> Interceptor[FastMCP Middleware Interceptor]:::stage
+    
+    Interceptor --> Target{Target Tool API}
+    Target -- 400 Bad Request --> Engine[A2A Event Bus]:::stage
+    Target -- 500 Server Error --> VendorSwap[Agentic SLA Negotiation]:::stage
+    
+    Engine --> CacheCheck{Postgres Cache Hit?}
+    CacheCheck -- Miss --> LLM[Groq Inference (Llama 3.1)]:::agent
+    LLM --> Transform[Apply Math & Type Casts]:::stage
+    CacheCheck -- Hit --> Transform
+    
+    VendorSwap --> LLM
+    VendorSwap --> Backup[Backup Salesforce API]:::endpoint
+    
+    Transform --> Guardian[SecurityValidationAgent]:::agent
+    
+    Guardian --> Safe{Payload Safe?}
+    Safe -- No --> Block([Block Execution]):::endpoint
+    Safe -- Yes --> ReExecute([Re-execute Healed Payload]):::endpoint
+    
+    ReExecute -- 200 OK --> Primary
+    ReExecute -- Event: on_successful_execution --> Mechanic[ASTPatchingAgent]:::agent
+    
+    Mechanic --> Rewrite[(Generate PR via LibCST)]:::db
+    
+    Gremlin([ Chaos StressTestAgent]) -. Concurrently Attacks .-> Interceptor
+```
+
+---
+
 ## 📁 Enterprise Folder Structure
 
 ```text
