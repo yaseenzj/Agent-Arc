@@ -52,28 +52,35 @@ autoheal-proxy/
 ## 🔄 The Neural Architecture (How it Works)
 
 ```mermaid
-sequenceDiagram
-    participant A as Primary Agent
-    participant I as Interceptor (Middleware)
-    participant E as Event Bus (Engine)
-    participant L as LLM / Cache
-    participant G as Guardian Agent
-    participant T as Target API
-    participant M as Mechanic Agent
-
-    A->>I: Call Tool (Legacy Payload)
-    I->>T: Try Execute
-    T-->>I: 400 Bad Request
-    I->>E: Trap Error & Route to Engine
-    E->>L: Request Payload Mapping
-    L-->>E: Return Deep Transform Rules
-    E->>E: Cast Types & Apply Math
-    E->>G: Emit `on_payload_healed`
-    G-->>E: Security Approved ✅
-    E->>T: Re-execute (Healed Payload)
-    T-->>A: 200 OK (Seamless Success)
-    E->>M: Emit `on_successful_execution`
-    Note over M: Background Task: Rewrites agent.py on disk
+graph TD
+    %% Styling
+    classDef stage fill:#2d3748,stroke:#4a5568,stroke-width:2px,color:#fff
+    classDef db fill:#2c5282,stroke:#4299e1,stroke-width:2px,color:#fff
+    classDef agent fill:#276749,stroke:#48bb78,stroke-width:2px,color:#fff
+    classDef endpoint fill:#742a2a,stroke:#fc8181,stroke-width:2px,color:#fff
+    
+    Primary([👤 Primary Agent]) --> Interceptor[FastMCP Middleware Interceptor]:::stage
+    
+    Interceptor --> Target{Target Tool API}
+    Target -- 400 Bad Request --> Engine[A2A Event Bus Orchestrator]:::stage
+    
+    Engine --> CacheCheck{Async Cache Hit?}
+    CacheCheck -- Miss --> LLM[Local Ollama LLM Inference]:::agent
+    LLM --> Transform[Apply Math & Type Casts]:::stage
+    CacheCheck -- Hit --> Transform
+    
+    Transform --> Guardian[Guardian Security Agent]:::agent
+    
+    Guardian --> Safe{Payload Safe?}
+    Safe -- No --> Block([Block Execution]):::endpoint
+    Safe -- Yes --> ReExecute([Re-execute Healed Payload]):::endpoint
+    
+    ReExecute -- 200 OK --> Primary
+    ReExecute -- Event: on_successful_execution --> Mechanic[Mechanic Patching Agent]:::agent
+    
+    Mechanic --> Rewrite[(Rewrite agent.py on Disk)]:::db
+    
+    Gremlin([👾 Chaos Gremlin Agent]) -. Concurrently Attacks .-> Interceptor
 ```
 
 ---
