@@ -1,5 +1,6 @@
 import asyncio
 from fastapi import FastAPI, BackgroundTasks
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 import uvicorn
 
@@ -9,6 +10,14 @@ from demo.agent import run_primary_agent
 from demo.agents.stress_test import run_stress_test_agent
 
 app = FastAPI(title="AutoHeal Proxy Control Plane")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow Vite frontend (port 5173) to communicate
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # 1. Initialize Mock FastMCP Server
 mcp_server = MockFastMCPServer()
