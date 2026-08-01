@@ -1,21 +1,21 @@
-import ast
 import os
 import re
-from src.agents.base import BaseAgent
-from typing import Dict, Any
-from src.telemetry import manager
 
-class ASTPatchingAgent(BaseAgent):
+from engine.plugins.base import AutoHealPlugin
+from engine.telemetry import manager
+
+
+class ASTPatchingAgent(AutoHealPlugin):
     """
     AST Auto-Patching Agent.
     Permanently patches the primary agent's source code on disk so it stops making the same mistake.
     """
     async def handle_on_successful_execution(self, tool_name: str, delta: dict):
-        print(f"🔧 [{self.name}] Attempting to auto-patch source code for tool: {tool_name}")
-        await manager.broadcast("mechanic", f"🔧 [ASTPatchingAgent] Attempting to auto-patch source code...", "warning")
+        print(f"[{self.name}] Attempting to auto-patch source code for tool: {tool_name}")
+        await manager.broadcast("mechanic", "[ASTPatchingAgent] Attempting to auto-patch source code...", "warning")
         
-        # For the hackathon demo, we explicitly target demo/agent.py
-        target_file = os.path.join("demo", "agent.py")
+        # For the hackathon demo, we explicitly target demo/agents/primary_agent.py
+        target_file = os.path.join("demo", "agents", "primary_agent.py")
         
         if not os.path.exists(target_file):
             print(f"[{self.name}] Could not find {target_file} to patch.")
@@ -38,7 +38,7 @@ class ASTPatchingAgent(BaseAgent):
         if patched:
             with open(target_file, "w", encoding="utf-8") as f:
                 f.write(new_content)
-            print(f"🚀 [{self.name}] SUCCESSFULLY PATCHED source code in {target_file}!")
-            await manager.broadcast("mechanic", f"🚀 [ASTPatchingAgent] SUCCESSFULLY PATCHED source code!", "success")
+            print(f"[{self.name}] SUCCESSFULLY PATCHED source code in {target_file}!")
+            await manager.broadcast("mechanic", "[ASTPatchingAgent] SUCCESSFULLY PATCHED source code!", "success")
         else:
             print(f"[{self.name}] No hardcoded keys found to patch in {target_file}.")

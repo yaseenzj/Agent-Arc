@@ -1,11 +1,15 @@
+import uuid
+
 import pytest
-import asyncio
-from src.data.cache import DeltaCache
+
+from engine.cache import DeltaCache
+
 
 @pytest.mark.asyncio
 async def test_cache_miss():
     cache = DeltaCache()
-    res = await cache.get_cached_delta("test_tool", "hash1")
+    unique_hash = str(uuid.uuid4())
+    res = await cache.get_cached_delta("test_tool", unique_hash)
     assert res is None
 
 @pytest.mark.asyncio

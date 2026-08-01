@@ -1,16 +1,16 @@
-# 🧠 Enterprise Neural Control Plane: AutoHeal A2A Architecture
+#  Enterprise Neural Control Plane: AutoHeal A2A Architecture
 
 > **Elevator Pitch:** A self-healing, multi-agent AI pipeline that automatically detects schema drift, infers fixes via local LLMs, safely patches payloads in 0ms, and permanently rewrites its own source code—all visualized through a stunning, real-time glassmorphism React dashboard.
 
 ---
 
-## 🌟 The Problem We Solve
+##  The Problem We Solve
 In microservice and agentic architectures (A2A), APIs evolve constantly. When a target API changes its expected schema (e.g., from `amount_usd` to `total_cents`), traditional AI agents crash, requiring manual developer intervention to update hardcoded payloads and parse new documentation.
 
-## 🚀 Our Solution: The AutoHeal Engine
+##  Our Solution: The AutoHeal Engine
 We built a deterministic, zero-downtime interceptor that automatically traps these errors and heals the system on the fly without dropping the request.
 
-### 🧩 Core Architecture
+###  Core Architecture
 
 ```mermaid
 graph TD
@@ -21,23 +21,23 @@ graph TD
     classDef cache fill:#8b5cf6,stroke:#fff,stroke-width:2px,color:#fff;
     classDef success fill:#10b981,stroke:#fff,stroke-width:2px,color:#fff;
 
-    A[👤 Primary Agent<br/>Payload: amount_usd]:::primary -->|Calls API| B{🛡️ FastMCP Interceptor}:::interceptor
+    A[ Primary Agent<br/>Payload: amount_usd]:::primary -->|Calls API| B{ FastMCP Interceptor}:::interceptor
     
-    B -->|400 Bad Request| C[⚙️ A2A Event Bus]:::bus
+    B -->|400 Bad Request| C[ A2A Event Bus]:::bus
     B -->|200 OK| X[End]:::success
     
-    C -->|on_schema_drift| D[🗄️ Async Cache Check]:::cache
+    C -->|on_schema_drift| D[ Async Cache Check]:::cache
     
-    D -->|Cache Miss| E[🧠 Local Ollama LLM]:::primary
-    E -->|Generates fix rule| F[🔄 Apply Transformations<br/>amount_usd ➜ total_cents]:::cache
+    D -->|Cache Miss| E[ Local Ollama LLM]:::primary
+    E -->|Generates fix rule| F[ Apply Transformations<br/>amount_usd ➜ total_cents]:::cache
     
     D -->|Cache Hit 0ms| F
     
-    F -->|Healed Payload| G{🔐 SecurityValidationAgent}:::interceptor
-    G -->|Approved| H[✨ Re-Execute API]:::success
+    F -->|Healed Payload| G{ SecurityValidationAgent}:::interceptor
+    G -->|Approved| H[ Re-Execute API]:::success
     G -->|Rejected| Z[Block Execution]:::interceptor
     
-    H -->|on_successful_execution| I[🔧 ASTPatchingAgent]:::cache
+    H -->|on_successful_execution| I[ ASTPatchingAgent]:::cache
     I -->|Rewrites Code| A
 ```
 
@@ -59,7 +59,7 @@ graph TD
 
 ---
 
-## 🎮 How to Demo This (Hackathon Guide)
+##  How to Demo This (Hackathon Guide)
 
 We built an incredible **Vite + React Flow** frontend to visualize this telemetry in real time. 
 
@@ -75,7 +75,7 @@ Click **"Run Primary Agent"**.
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 - **Backend:** FastAPI, Python `asyncio`, Abstract Syntax Trees (`ast`), Local LLMs (Ollama)
 - **Frontend:** React, Vite, `@xyflow/react` (for the interactive neural graph), Vanilla CSS (Glassmorphism)
 - **Architecture:** Onion-Middleware, Event-Driven Orchestration, Concurrency Locking

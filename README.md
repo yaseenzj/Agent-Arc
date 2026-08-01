@@ -1,28 +1,28 @@
-# 🚀 AutoHeal MCP Proxy (Agent-to-Agent Architecture)
+#  AutoHeal MCP Proxy (Agent-to-Agent Architecture)
 
 An enterprise-grade, **Zero-Infrastructure Multi-Agent System** that intercepts API schema drift, dynamically infers mathematical payload transformations using a local LLM, and self-heals broken agents by rewriting their source code in real-time.
 
 ---
 
-## 🌟 Core Features
+##  Core Features
 
 - **The Event Bus Orchestrator**: The central engine runs on an asynchronous Event Bus. It doesn't hardcode logic. It catches 400 Bad Request errors, heals payloads, and broadcasts events (`on_schema_drift`, `on_successful_execution`).
 - **Plug-and-Play A2A (Agent-to-Agent)**: You can drop new autonomous sub-agents into the ecosystem. They subscribe to events and run concurrently without shutting down the main proxy.
 - **Deep Payload Transformations**: Uses strict Pydantic v2 schemas to force the LLM to output mapping rules including `key_mapping`, `value_cast` (e.g., `int`), and `value_math_modifier` (e.g., `* 100`).
 - **Zero-Infrastructure Async Cache**: Uses a highly optimized in-memory Python dictionary with `asyncio.Lock()` to prevent race conditions during concurrent LLM requests (bypassing the need for heavy Redis containers).
 
-## 🧠 The Agent Lineup
+##  The Agent Lineup
 
-1. **🛡️ The SecurityValidationAgent (Zero-Trust Security)**
+1. ** The SecurityValidationAgent (Zero-Trust Security)**
    Intercepts the LLM's generated payload before it touches the target API. Scans for malicious injections (like SQL drops) and blocks unsafe executions.
-2. **🔧 The ASTPatchingAgent (AST Auto-Patching)**
+2. ** The ASTPatchingAgent (AST Auto-Patching)**
    Once a payload is successfully healed and executed, this agent wakes up in the background, locates the original agent's source code on your hard drive, and literally rewrites the python file so the agent never makes the mistake again.
-3. **👾 The StressTestAgent (Chaos Engineering)**
+3. ** The StressTestAgent (Chaos Engineering)**
    A stress-testing adversary agent. It bombards the FastMCP server with legacy schemas, weird data types, and broken JSON concurrently to visually demonstrate the AutoHeal proxy's locking resilience in live demos.
 
 ---
 
-## 📂 Enterprise Folder Structure
+##  Enterprise Folder Structure
 
 ```text
 autoheal-proxy/
@@ -49,7 +49,7 @@ autoheal-proxy/
 
 ---
 
-## 🔄 The Neural Architecture (How it Works)
+##  The Neural Architecture (How it Works)
 
 ```mermaid
 graph TD
@@ -59,7 +59,7 @@ graph TD
     classDef agent fill:#276749,stroke:#48bb78,stroke-width:2px,color:#fff
     classDef endpoint fill:#742a2a,stroke:#fc8181,stroke-width:2px,color:#fff
     
-    Primary([👤 Primary Agent]) --> Interceptor[FastMCP Middleware Interceptor]:::stage
+    Primary([ Primary Agent]) --> Interceptor[FastMCP Middleware Interceptor]:::stage
     
     Interceptor --> Target{Target Tool API}
     Target -- 400 Bad Request --> Engine[A2A Event Bus Orchestrator]:::stage
@@ -80,12 +80,12 @@ graph TD
     
     Mechanic --> Rewrite[(Rewrite agent.py on Disk)]:::db
     
-    Gremlin([👾 Chaos StressTestAgent]) -. Concurrently Attacks .-> Interceptor
+    Gremlin([ Chaos StressTestAgent]) -. Concurrently Attacks .-> Interceptor
 ```
 
 ---
 
-## 🚀 Getting Started (Live Demo)
+##  Getting Started (Live Demo)
 
 1. **Install Dependencies**
    ```bash

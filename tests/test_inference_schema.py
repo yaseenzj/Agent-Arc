@@ -1,11 +1,13 @@
 import pytest
 from pydantic import ValidationError
-from src.ai.schemas import DeltaMappingResponse
+
+from engine.schemas import DeltaMappingResponse
+
 
 def test_valid_schema():
-    mapping = {"old_key": "new_key"}
+    mapping = {"old_key": {"key_mapping": "new_key", "value_cast": "str", "value_math_modifier": None}}
     resp = DeltaMappingResponse(mapping=mapping)
-    assert resp.mapping == mapping
+    assert resp.mapping["old_key"].key_mapping == "new_key"
 
 def test_invalid_schema():
     with pytest.raises(ValidationError):

@@ -11,25 +11,25 @@ import {
 import '@xyflow/react/dist/style.css';
 import './App.css';
 
-const initialNodes = [
-  { id: 'primary', position: { x: 250, y: 50 }, data: { label: '👤 Primary Agent' }, type: 'input' },
-  { id: 'gremlin', position: { x: 550, y: 50 }, data: { label: '👾 Chaos StressTestAgent' }, type: 'input', style: { border: '1px solid #f43f5e' } },
+const initialNodes =[
+  { id: 'primary', position: { x: 250, y: 50 }, data: { label: ' Primary Agent' }, type: 'input' },
+  { id: 'gremlin', position: { x: 550, y: 50 }, data: { label: ' Chaos StressTestAgent' }, type: 'input', style: { border: '1px solid #f43f5e' } },
   
-  { id: 'interceptor', position: { x: 250, y: 150 }, data: { label: '🛡️ FastMCP Interceptor' } },
-  { id: 'engine', position: { x: 250, y: 250 }, data: { label: '⚙️ A2A Event Bus' } },
+  { id: 'interceptor', position: { x: 250, y: 150 }, data: { label: ' FastMCP Interceptor' } },
+  { id: 'engine', position: { x: 250, y: 250 }, data: { label: ' A2A Event Bus' } },
   
-  { id: 'cache', position: { x: 250, y: 350 }, data: { label: '🗄️ Async Cache Check' } },
-  { id: 'llm', position: { x: 500, y: 350 }, data: { label: '🧠 Local Ollama LLM' } },
+  { id: 'cache', position: { x: 250, y: 350 }, data: { label: ' Async Cache Check' } },
+  { id: 'llm', position: { x: 500, y: 350 }, data: { label: ' Local Ollama LLM' } },
   
-  { id: 'transform', position: { x: 250, y: 450 }, data: { label: '🔄 Apply Transformations' } },
+  { id: 'transform', position: { x: 250, y: 450 }, data: { label: ' Apply Transformations' } },
   
-  { id: 'security', position: { x: 250, y: 550 }, data: { label: '🔐 SecurityValidationAgent' } },
+  { id: 'security', position: { x: 250, y: 550 }, data: { label: ' SecurityValidationAgent' } },
   
-  { id: 'reexecute', position: { x: 250, y: 650 }, data: { label: '✨ Re-Execute API' } },
-  { id: 'patcher', position: { x: 500, y: 650 }, data: { label: '🔧 ASTPatchingAgent' }, type: 'output' },
+  { id: 'reexecute', position: { x: 250, y: 650 }, data: { label: ' Re-Execute API' } },
+  { id: 'patcher', position: { x: 500, y: 650 }, data: { label: ' ASTPatchingAgent' }, type: 'output' },
 ];
 
-const initialEdges = [
+const initialEdges =[
   { id: 'e-prim-int', source: 'primary', target: 'interceptor', markerEnd: { type: MarkerType.ArrowClosed } },
   { id: 'e-grem-int', source: 'gremlin', target: 'interceptor', markerEnd: { type: MarkerType.ArrowClosed } },
   
@@ -49,25 +49,35 @@ const initialEdges = [
 ];
 
 function App() {
-  const [logs, setLogs] = useState([]);
-  const [wsStatus, setWsStatus] = useState('connecting');
+  const[logs, setLogs] = useState([]);
+  const[wsStatus, setWsStatus] = useState('connecting');
   
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const[nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const[edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   
   const terminalEndRef = useRef(null);
   const ws = useRef(null);
+
+  // Live KPI Metrics
+  const [metrics, setMetrics] = useState({
+    errorsPrevented: 0,
+    cacheHits: 0,
+    llmInferences: 0
+  });
   
   // Create an event queue so fast backend events are animated beautifully one-by-one
   const eventQueue = useRef([]);
   const isAnimating = useRef(false);
+  const isIntentionalClose = useRef(false);
 
   useEffect(() => {
+    isIntentionalClose.current = false;
     connectWebSocket();
     return () => {
+      isIntentionalClose.current = true;
       if (ws.current) ws.current.close();
     };
-  }, []);
+  },[]);
 
   const connectWebSocket = () => {
     setWsStatus('connecting');
@@ -75,7 +85,7 @@ function App() {
 
     ws.current.onopen = () => {
       setWsStatus('connected');
-      addLog('🔌 Connected to AutoHeal Telemetry Stream', 'success');
+      addLog(' Connected to AutoHeal Telemetry Stream', 'success');
     };
 
     ws.current.onmessage = (event) => {
@@ -85,8 +95,9 @@ function App() {
     };
 
     ws.current.onclose = () => {
+      if (isIntentionalClose.current) return;
       setWsStatus('offline');
-      addLog('🔴 SYSTEM OFFLINE: Backend Server Unreachable', 'error');
+      addLog(' SYSTEM OFFLINE: Backend Server Unreachable', 'error');
       setTimeout(connectWebSocket, 5000);
     };
 
@@ -103,6 +114,15 @@ function App() {
     
     // 1. Add the log to the terminal instantly
     addLog(data.msg, data.type);
+
+    // Update KPI Metrics based on telemetry content
+    if (data.msg.includes("[400 CAUGHT]")) {
+      setMetrics(m => ({ ...m, errorsPrevented: m.errorsPrevented + 1 }));
+    } else if (data.msg.includes("[CACHE HIT]")) {
+      setMetrics(m => ({ ...m, cacheHits: m.cacheHits + 1 }));
+    } else if (data.msg.includes("[INFERENCE START]")) {
+      setMetrics(m => ({ ...m, llmInferences: m.llmInferences + 1 }));
+    }
     
     // 2. Animate the node graph if a node was specified
     if (data.node) {
@@ -143,12 +163,12 @@ function App() {
   };
 
   const addLog = (msg, type = 'info') => {
-    setLogs(prev => [...prev, { time: new Date().toLocaleTimeString(), msg, type }]);
+    setLogs(prev =>[...prev, { time: new Date().toLocaleTimeString(), msg, type }]);
   };
 
   useEffect(() => {
     terminalEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [logs]);
+  },[logs]);
 
   const handleRunAgent = async () => {
     try {
@@ -170,18 +190,32 @@ function App() {
     <div className="app-container">
       {wsStatus === 'offline' && (
         <div style={{ background: '#f43f5e', color: 'white', padding: '0.5rem', textAlign: 'center', fontWeight: 'bold', borderRadius: '8px' }}>
-          ⚠️ BACKEND OFFLINE. Please start the FastAPI Server.
+           BACKEND OFFLINE. Please start the FastAPI Server.
         </div>
       )}
 
       <header className="header">
         <h1>Enterprise Neural Control Plane</h1>
         <p>Live Multi-Agent AutoHeal Telemetry</p>
+        <div className="metrics-dashboard" style={{ display: 'flex', gap: '2rem', justifyContent: 'center', marginTop: '1rem' }}>
+          <div className="metric-card" style={{ background: '#1e293b', padding: '10px 20px', borderRadius: '8px', border: '1px solid #334155' }}>
+            <div style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Errors Prevented</div>
+            <div style={{ color: '#f43f5e', fontSize: '1.5rem', fontWeight: 'bold' }}>{metrics.errorsPrevented}</div>
+          </div>
+          <div className="metric-card" style={{ background: '#1e293b', padding: '10px 20px', borderRadius: '8px', border: '1px solid #334155' }}>
+            <div style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Cache Hits (0ms)</div>
+            <div style={{ color: '#22c55e', fontSize: '1.5rem', fontWeight: 'bold' }}>{metrics.cacheHits}</div>
+          </div>
+          <div className="metric-card" style={{ background: '#1e293b', padding: '10px 20px', borderRadius: '8px', border: '1px solid #334155' }}>
+            <div style={{ color: '#94a3b8', fontSize: '0.9rem' }}>LLM Inferences</div>
+            <div style={{ color: '#a855f7', fontSize: '1.5rem', fontWeight: 'bold' }}>{metrics.llmInferences}</div>
+          </div>
+        </div>
       </header>
 
       <main className="main-content">
         <section className="glass-panel left-panel">
-          <div className="panel-title">⚡ Command Center</div>
+          <div className="panel-title"> Command Center</div>
           
           <div className="controls">
             <button className="btn btn-primary" onClick={handleRunAgent} disabled={wsStatus !== 'connected'}>
@@ -192,7 +226,7 @@ function App() {
             </button>
           </div>
 
-          <div className="panel-title" style={{marginTop: '1rem'}}>📟 Live Telemetry Stream</div>
+          <div className="panel-title" style={{marginTop: '1rem'}}> Live Telemetry Stream</div>
           <div className="terminal">
             {logs.map((log, i) => (
               <div key={i} className="log-entry">

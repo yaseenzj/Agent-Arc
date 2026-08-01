@@ -35,12 +35,26 @@ class MockFastMCPServer:
 
 async def mock_crm_tool(args: dict):
     """
-    Target Tool with Intentional Schema Drift.
+    Target Tool with Intentional Schema Drift and Outage Simulation.
     It expects 'total_cents', but old agents still send 'amount_usd'.
     """
+    # Simulate a complete provider outage (500 Error)
+    if args.get('total_cents') == 50000 or args.get('amount_usd') == 500:
+        raise Exception("500 Internal Server Error: The legacy CRM provider is completely offline.")
+
     if 'total_cents' not in args:
         raise ValueError(
             "Validation Error: 400 Bad Request - Missing required field 'total_cents'. "
             "'amount_usd' is deprecated."
         )
     return {"status": "success", "recorded_cents": args['total_cents']}
+
+async def mock_salesforce_tool(args: dict):
+    """
+    Competitor Backup Tool.
+    Has a completely different schema: expects 'customer_id' (str) and 'revenue_usd' (float).
+    """
+    if 'customer_id' not in args or 'revenue_usd' not in args:
+        raise ValueError("Salesforce Validation Error: Missing 'customer_id' or 'revenue_usd'")
+    
+    return {"status": "success", "vendor": "salesforce", "customer": args['customer_id'], "revenue": args['revenue_usd']}

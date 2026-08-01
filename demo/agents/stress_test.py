@@ -1,28 +1,31 @@
 import asyncio
-from src.telemetry import manager
+
+from engine.telemetry import manager
+
 
 async def run_stress_test_agent(server):
     """
     The Stress Test Agent.
     Bombards the mock server with legacy payloads to prove resilience.
     """
-    print("\n👾 [STRESS TEST AGENT] Initiating Concurrency Attack on 'update_crm'...")
+    print("\n[STRESS TEST AGENT] Initiating Concurrency Attack on 'update_crm'...")
     
     # The stress test sends a bunch of outdated payloads simultaneously
     payloads = [
         {"user_id": "991", "amount_usd": 150},
         {"user_id": "992", "amount_usd": 420},
         {"user_id": "993", "amount_usd": 50},
+        {"user_id": "888", "amount_usd": 500} # NUCLEAR PAYLOAD: Triggers 500 Outage
     ]
     
     async def attack(payload):
-        print(f"👾 [STRESS TEST] Firing legacy payload: {payload}")
-        await manager.broadcast("gremlin", f"👾 [STRESS TEST] Firing legacy payload: {payload}", "error")
+        print(f"[STRESS TEST] Firing legacy payload: {payload}")
+        await manager.broadcast("gremlin", f"[STRESS TEST] Firing legacy payload: {payload}", "error")
         try:
             await server.call_tool("update_crm", payload)
-        except Exception as e:
+        except Exception:
             pass
 
     # Fire all attacks concurrently to test asyncio.Lock and Cache sharing
     await asyncio.gather(*(attack(p) for p in payloads))
-    print("👾 [STRESS TEST AGENT] Attack sequence complete.")
+    print("[STRESS TEST AGENT] Attack sequence complete.")

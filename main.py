@@ -1,18 +1,23 @@
 import sys
+
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding='utf-8')
+from dotenv import load_dotenv
 
-from fastapi import FastAPI, BackgroundTasks, WebSocket, WebSocketDisconnect
-from fastapi.middleware.cors import CORSMiddleware
-from src.telemetry import manager
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+load_dotenv()
+
 import uvicorn
+from fastapi import BackgroundTasks, FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
 
-from src.transport.interceptor import AutoHealMiddleware
-from demo.mock_targets.crm_tool import MockFastMCPServer, mock_crm_tool
-from demo.agent import run_primary_agent
+from demo.agents.primary_agent import run_primary_agent
 from demo.agents.stress_test import run_stress_test_agent
+from demo.tools.mock_crm import MockFastMCPServer, mock_crm_tool, mock_salesforce_tool
+from engine.engine import engine
+from engine.interceptor import AutoHealMiddleware
+from engine.plugins.ast_patcher import ASTPatchingAgent
+from engine.plugins.security_validator import SecurityValidationAgent
+from engine.telemetry import manager
 
 app = FastAPI(title="AutoHeal Proxy Control Plane")
 
@@ -24,11 +29,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 1. Initialize Mock FastMCP Server
-mcp_server = MockFastMCPServer()
+# 1. Register AutoHeal Plugins (Plug and Play Workflow)
+engine.register_plugin(SecurityValidationAgent())
+engine.register_plugin(ASTPatchingAgent())
 
-# 2. Register Target Tool (CRM System with Schema Drift)
+# 2. Setup FastMCP Server Mock
+mcp_server = MockFastMCPServer()
 mcp_server.register_tool("update_crm", mock_crm_tool)
+mcp_server.register_tool("salesforce_crm", mock_salesforce_tool)
 
 # 3. Register Middleware Interceptor (Yaseen's AutoHeal)
 mcp_server.add_middleware(AutoHealMiddleware())

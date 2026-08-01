@@ -1,10 +1,11 @@
 import asyncio
 from typing import Any
 
-class BaseAgent:
+
+class AutoHealPlugin:
     """
-    Base class for all Plug-and-Play AutoHeal agents.
-    Agents subscribe to specific events emitted by the orchestrator event bus.
+    Base class for all Plug-and-Play AutoHeal plugins.
+    Plugins subscribe to specific events emitted by the orchestrator event bus.
     """
     
     def __init__(self):
