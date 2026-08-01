@@ -9,7 +9,8 @@ An enterprise-grade, **Zero-Infrastructure Multi-Agent System** that intercepts 
 - **The Event Bus Orchestrator**: The central engine runs on an asynchronous Event Bus. It doesn't hardcode logic. It catches 400 Bad Request errors, heals payloads, and broadcasts events (`on_schema_drift`, `on_successful_execution`).
 - **Plug-and-Play A2A (Agent-to-Agent)**: You can drop new autonomous sub-agents into the ecosystem. They subscribe to events and run concurrently without shutting down the main proxy.
 - **Deep Payload Transformations**: Uses strict Pydantic v2 schemas to force the LLM to output mapping rules including `key_mapping`, `value_cast` (e.g., `int`), and `value_math_modifier` (e.g., `* 100`).
-- **Zero-Infrastructure Async Cache**: Uses a highly optimized in-memory Python dictionary with `asyncio.Lock()` to prevent race conditions during concurrent LLM requests (bypassing the need for heavy Redis containers).
+- **Agentic SLA Negotiation**: Traps unrecoverable 500 Internal Server Errors, autonomously selects a backup competitor API, translates the JSON payload, and reroutes traffic on the fly for 100% uptime.
+- **Enterprise Postgres Cache**: Uses a persistent PostgreSQL database (`asyncpg`) to store AI-generated schema fixes permanently, bypassing the LLM on future executions for 0ms latency.
 
 ##  The Agent Lineup
 
@@ -32,10 +33,10 @@ autoheal-proxy/
 ├── src/                            # Core Engine
 │   ├── orchestrator/engine.py      # The A2A Event Bus & Proxy Engine
 │   ├── transport/interceptor.py    # FastMCP Middleware interceptor hook
-│   ├── data/cache.py               # Async In-Memory Cache
+│   ├── data/cache.py               # Enterprise PostgreSQL Cache
 │   ├── ai/
 │   │   ├── schemas.py              # Strict Pydantic Models for deep transforms
-│   │   └── inference.py            # Local Ollama LLM integration
+│   │   └── inference.py            # High-speed Groq LLM integration
 │   │
 │   └── agents/                     # Plug-and-Play Sub-Agents
 │       ├── base.py                 # Event-driven Base Agent
@@ -62,12 +63,16 @@ graph TD
     Primary([ Primary Agent]) --> Interceptor[FastMCP Middleware Interceptor]:::stage
     
     Interceptor --> Target{Target Tool API}
-    Target -- 400 Bad Request --> Engine[A2A Event Bus Orchestrator]:::stage
+    Target -- 400 Bad Request --> Engine[A2A Event Bus]:::stage
+    Target -- 500 Server Error --> VendorSwap[Agentic SLA Negotiation]:::stage
     
-    Engine --> CacheCheck{Async Cache Hit?}
-    CacheCheck -- Miss --> LLM[Local Ollama LLM Inference]:::agent
+    Engine --> CacheCheck{Postgres Cache Hit?}
+    CacheCheck -- Miss --> LLM[Groq Inference]:::agent
     LLM --> Transform[Apply Math & Type Casts]:::stage
     CacheCheck -- Hit --> Transform
+    
+    VendorSwap --> LLM
+    VendorSwap --> Backup[Backup Salesforce API]:::endpoint
     
     Transform --> Guardian[SecurityValidationAgent]:::agent
     

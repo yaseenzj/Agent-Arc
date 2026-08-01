@@ -24,12 +24,16 @@ graph TD
     A[ Primary Agent<br/>Payload: amount_usd]:::primary -->|Calls API| B{ FastMCP Interceptor}:::interceptor
     
     B -->|400 Bad Request| C[ A2A Event Bus]:::bus
+    B -->|500 Server Error| V[ Vendor Swap Engine]:::interceptor
     B -->|200 OK| X[End]:::success
     
-    C -->|on_schema_drift| D[ Async Cache Check]:::cache
+    C -->|on_schema_drift| D[ Postgres Cache Check]:::cache
     
-    D -->|Cache Miss| E[ Local Ollama LLM]:::primary
+    D -->|Cache Miss| E[ Groq LLM]:::primary
     E -->|Generates fix rule| F[ Apply Transformations<br/>amount_usd ➜ total_cents]:::cache
+    
+    V -->|negotiate_vendor_swap| E
+    V -->|Translate to Salesforce| S[ Backup Tool <br/> salesforce_crm]:::success
     
     D -->|Cache Hit 0ms| F
     
@@ -47,9 +51,9 @@ graph TD
 2. **A2A Event Bus (The Nervous System)**
    - An asynchronous event-driven orchestrator that broadcasts the error context to our specialized Plugin Agents. It utilizes `asyncio.Lock()` to perfectly handle massive concurrency (e.g., if 50 agents fail at the exact same time).
 
-3. **Inference & Async Cache (The Brain)**
-   - Queries a local Ollama LLM to dynamically generate deep transformation rules (e.g., mapping `amount_usd` -> `total_cents` and scaling the value `* 100`).
-   - Caches the rules in-memory. Future failures are healed in **0ms** via Cache Hits, completely bypassing the LLM.
+3. **Inference & Postgres Cache (The Brain)**
+   - Queries Groq (Llama 3) to dynamically generate deep transformation rules or negotiate vendor swaps.
+   - Caches the rules in an Enterprise PostgreSQL Database. Future failures are healed in **0ms** via Cache Hits, completely bypassing the LLM.
 
 4. **SecurityValidationAgent (The Guard)**
    - Inspects every dynamically healed payload to ensure the LLM hasn't hallucinated malicious prompt injections before re-execution.
