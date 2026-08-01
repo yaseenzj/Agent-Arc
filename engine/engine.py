@@ -11,9 +11,7 @@ _delta_cache = DeltaCache()
 get_cached_delta = _delta_cache.get_cached_delta
 save_delta = _delta_cache.save_delta
 
-# -------------------------------------------------------------------------
-# AUTOHEAL ORCHESTRATOR (EVENT BUS)
-# -------------------------------------------------------------------------
+
 
 def hash_payload(payload: dict) -> str:
     keys = sorted(payload.keys())

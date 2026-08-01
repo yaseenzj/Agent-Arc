@@ -1,4 +1,4 @@
-# AutoHeal MCP Proxy - Architecture Design
+# 🏛️ AutoHeal MCP Proxy - Architecture Design
 
 ## System Overview
 The AutoHeal MCP Proxy is designed to decouple tool execution failure states from the primary AI agent. It acts as a FastMCP middleware interceptor that catches JSON-RPC validation exceptions (e.g., 400 Bad Request) indicating schema drift, and automatically self-heals the payload before the primary agent even notices a failure.
@@ -8,9 +8,10 @@ The AutoHeal MCP Proxy is designed to decouple tool execution failure states fro
 1. **Primary Agent**: The main reasoning engine trying to accomplish a workflow.
 2. **FastMCP Server**: The host for the tools/APIs.
 3. **AutoHeal Middleware (`interceptor.py`)**: Traps execution, catches validation errors, and passes the failed context to the orchestrator.
-4. **Proxy Engine (`engine.py`)**: The central orchestrator for the self-healing workflow.
-5. **Delta Cache (`cache.py`)**: An Enterprise PostgreSQL Database mapping old payload hashes to successful payload deltas for permanent memory.
-6. **Inference Fallback (`inference.py`)**: High-speed Groq (Llama 3.1 8B) tuned for structured JSON output to deduce schema mapping fixes and negotiate vendor swaps.
+4. **Proxy Engine (`engine.py`)**: The central orchestrator for the self-healing workflow. Features `asyncio.Lock()` concurrency protection.
+5. **Delta Cache (`cache.py`)**: An Enterprise PostgreSQL Database mapping old payload hashes to successful payload deltas for permanent memory and 0ms latency lookups.
+6. **Inference Fallback (`inference.py`)**: High-speed Groq Cloud API (Llama 3.1 8B) tuned for structured JSON output to deduce schema mapping fixes and negotiate vendor swaps in under 0.2 seconds.
+7. **AST Patcher (`ast_patcher.py`)**: Uses Meta's LibCST to perform lossless syntax tree modifications and generate GitHub Pull Request `.diff` patches.
 
 ## Request Lifecycle (Sequence Diagram)
 
@@ -20,7 +21,7 @@ sequenceDiagram
     participant FastMCP as Proxy Interceptor (Yaseen)
     participant Engine as Proxy Engine (Yaseen)
     participant Cache as Postgres DB (Swaveel)
-    participant Inference as Groq LLM (Afsal)
+    participant Inference as Groq Llama 3.1 (Afsal)
     participant Tool as Target Tool (CRM)
     participant Backup as Backup Tool (Salesforce)
 
