@@ -23,22 +23,20 @@ app = FastAPI(title="AutoHeal Proxy Control Plane")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow Vite frontend (port 5173) to communicate
+    allow_origins=["*"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# 1. Register AutoHeal Plugins (Plug and Play Workflow)
+#p&p
 engine.register_plugin(SecurityValidationAgent())
 engine.register_plugin(ASTPatchingAgent())
 
-# 2. Setup FastMCP Server Mock
 mcp_server = MockFastMCPServer()
 mcp_server.register_tool("update_crm", mock_crm_tool)
 mcp_server.register_tool("salesforce_crm", mock_salesforce_tool)
 
-# 3. Register Middleware Interceptor (Yaseen's AutoHeal)
 mcp_server.add_middleware(AutoHealMiddleware())
 
 @app.get("/")

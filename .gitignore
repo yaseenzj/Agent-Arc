@@ -1,14 +1,20 @@
-# Environments
+
 .env
 .venv/
 venv/
 ENV/
+.cache/
 
-# Python Cache
 __pycache__/
 *.py[cod]
 *$py.class
 
-# OS Files
 .DS_Store
 Thumbs.db
+
+node_modules/
+dist/
+dist-ssr/
+*.local
+npm-debug.log*
+yarn-error.log*
