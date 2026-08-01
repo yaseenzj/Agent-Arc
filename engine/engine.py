@@ -5,7 +5,7 @@ from typing import Any
 from engine.cache import DeltaCache
 from engine.inference import infer_delta
 from engine.plugins.base import AutoHealPlugin
-from engine.telemetry import manager
+from engine.broadcaster import manager
 
 _delta_cache = DeltaCache()
 get_cached_delta = _delta_cache.get_cached_delta
@@ -133,7 +133,7 @@ class AutoHealEngine:
         map the payload, and route traffic to the backup vendor to maintain 100% uptime.
         """
         from engine.inference import negotiate_vendor_swap
-        from engine.telemetry import manager
+        from engine.broadcaster import manager
         
         await manager.broadcast("engine", f"🚨 Vendor {tool_name} is DOWN. Initiating Agentic SLA Negotiation...", "warning")
         

@@ -1,6 +1,6 @@
 import asyncio
 
-from engine.telemetry import manager
+from engine.broadcaster import manager
 
 
 async def run_stress_test_agent(server):

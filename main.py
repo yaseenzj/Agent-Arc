@@ -5,6 +5,8 @@ if sys.platform == "win32":
 from dotenv import load_dotenv
 
 load_dotenv()
+import os
+import glob
 
 import uvicorn
 from fastapi import BackgroundTasks, FastAPI, WebSocket, WebSocketDisconnect
@@ -17,7 +19,7 @@ from engine.engine import engine
 from engine.interceptor import AutoHealMiddleware
 from engine.plugins.ast_patcher import ASTPatchingAgent
 from engine.plugins.security_validator import SecurityValidationAgent
-from engine.telemetry import manager
+from engine.broadcaster import manager
 
 app = FastAPI(title="AutoHeal Proxy Control Plane")
 
@@ -52,6 +54,8 @@ async def api_run_agent(background_tasks: BackgroundTasks):
 async def api_run_stress_test(background_tasks: BackgroundTasks):
     background_tasks.add_task(run_stress_test_agent, mcp_server)
     return {"status": "Stress Test agent dispatched. Check terminal logs."}
+
+
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):

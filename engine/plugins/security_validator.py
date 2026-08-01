@@ -1,7 +1,7 @@
 from typing import Any
 
 from engine.plugins.base import AutoHealPlugin
-from engine.telemetry import manager
+from engine.broadcaster import manager
 
 
 class SecurityValidationAgent(AutoHealPlugin):

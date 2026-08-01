@@ -2,9 +2,10 @@ import os
 import difflib
 from datetime import datetime
 import libcst as cst
+from github import Github
 
 from engine.plugins.base import AutoHealPlugin
-from engine.telemetry import manager
+from engine.broadcaster import manager
 
 class PayloadKeyTransformer(cst.CSTTransformer):
     """
@@ -60,33 +61,52 @@ class ASTPatchingAgent(AutoHealPlugin):
         transformer = PayloadKeyTransformer(delta)
         modified_tree = source_tree.visit(transformer)
         
-        patched = transformer.patched
-        new_content = modified_tree.code
-
-        if patched:
-            # Human-in-the-Loop: Generate a diff patch instead of overwriting the file
-            original_lines = content.splitlines(keepends=True)
-            new_lines = new_content.splitlines(keepends=True)
+        if transformer.patched:
+            new_content = modified_tree.code
             
-            diff = difflib.unified_diff(
-                original_lines, 
-                new_lines, 
-                fromfile=f"a/{target_file}", 
-                tofile=f"b/{target_file}", 
-                n=3
-            )
-            
-            diff_text = "".join(diff)
-            
-            # Save the patch file
-            timestamp = datetime.now().strftime("%Y%md_%H%M%S")
-            pr_id = hash(timestamp) % 10000
-            patch_filename = f"PR_{pr_id}_patch.diff"
-            
-            with open(patch_filename, "w", encoding="utf-8") as f:
-                f.write(diff_text)
+            # --- Authentic GitHub PR Integration ---
+            gh_token = os.getenv("GITHUB_TOKEN")
+            if not gh_token:
+                await manager.broadcast("mechanic", "❌ GITHUB_TOKEN not found in .env! Cannot create PR.", "error")
+                return
                 
-            print(f"[{self.name}] 🚀 Generated Pull Request patch: {patch_filename}")
-            await manager.broadcast("mechanic", f"🚀 [ASTPatchingAgent] Opened GitHub PR #{pr_id} for Human Review! (See {patch_filename})", "success")
+            try:
+                g = Github(gh_token)
+                repo = g.get_repo("yaseenzj/Agent-Arc")
+                
+                # Create a new branch
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                branch_name = f"autoheal-patch-{timestamp}"
+                
+                main_branch = repo.get_branch("main")
+                repo.create_git_ref(ref=f"refs/heads/{branch_name}", sha=main_branch.commit.sha)
+                
+                # Update the file in the repository (use forward slashes for github path)
+                github_file_path = "demo/agents/primary_agent.py"
+                file_contents = repo.get_contents(github_file_path, ref="main")
+                
+                repo.update_file(
+                    path=github_file_path,
+                    message=f"AutoHeal: Schema drift fix for {tool_name}",
+                    content=new_content,
+                    sha=file_contents.sha,
+                    branch=branch_name
+                )
+                
+                # Open the Pull Request
+                pr = repo.create_pull(
+                    title=f"AutoHeal Patch: Schema Drift in {tool_name}",
+                    body="The AutoHeal proxy detected a 400 Bad Request caused by schema drift. The payload was automatically healed via Llama 3.1 and execution succeeded. This PR applies the LibCST AST patch to fix the source code permanently.",
+                    head=branch_name,
+                    base="main"
+                )
+                
+                print(f"[{self.name}] 🚀 Generated Pull Request: {pr.html_url}")
+                await manager.broadcast("mechanic", f"🚀 [ASTPatchingAgent] Opened Real GitHub PR #{pr.number}!", "success")
+                await manager.broadcast("mechanic", f"[PR_URL] {pr.html_url}", "info")
+                
+            except Exception as e:
+                print(f"[{self.name}] GitHub API Error: {e}")
+                await manager.broadcast("mechanic", f"❌ GitHub API Error: {str(e)}", "error")
         else:
             print(f"[{self.name}] No hardcoded keys found to patch in {target_file}.")

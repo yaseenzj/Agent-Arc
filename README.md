@@ -101,7 +101,7 @@ autoheal-proxy/
    uv run python main.py
    ```
 
-3. **Start the React Telemetry Dashboard**
+3. **Start the React Broadcaster Dashboard**
    ```bash
    cd web
    npm run dev

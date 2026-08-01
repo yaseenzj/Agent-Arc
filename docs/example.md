@@ -32,7 +32,7 @@ We built a deterministic, zero-downtime interceptor that automatically traps the
 
 ## 🎮 How to Demo This (Hackathon Guide)
 
-We built an incredible **Vite + React Flow** frontend to visualize this telemetry in real time. 
+We built an incredible **Vite + React Flow** frontend to visualize this broadcaster stream in real time. 
 
 ### Action 1: The Concurrency Stress Test
 Click **"Run Chaos Test"** on the dashboard.

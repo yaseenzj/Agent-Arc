@@ -65,6 +65,8 @@ function App() {
     llmInferences: 0
   });
   
+  const [prUrl, setPrUrl] = useState(null);
+  
   // Create an event queue so fast backend events are animated beautifully one-by-one
   const eventQueue = useRef([]);
   const isAnimating = useRef(false);
@@ -85,7 +87,7 @@ function App() {
 
     ws.current.onopen = () => {
       setWsStatus('connected');
-      addLog(' Connected to AutoHeal Telemetry Stream', 'success');
+      addLog(' Connected to AutoHeal Broadcaster Stream', 'success');
     };
 
     ws.current.onmessage = (event) => {
@@ -112,10 +114,18 @@ function App() {
     isAnimating.current = true;
     const data = eventQueue.current.shift();
     
+    if (data.msg.includes("[PR_URL]")) {
+      const url = data.msg.replace("[PR_URL]", "").trim();
+      setPrUrl(url);
+      isAnimating.current = false;
+      processQueue();
+      return;
+    }
+    
     // 1. Add the log to the terminal instantly
     addLog(data.msg, data.type);
 
-    // Update KPI Metrics based on telemetry content
+    // Update KPI Metrics based on broadcaster content
     if (data.msg.includes("[400 CAUGHT]")) {
       setMetrics(m => ({ ...m, errorsPrevented: m.errorsPrevented + 1 }));
     } else if (data.msg.includes("[CACHE HIT]")) {
@@ -196,7 +206,7 @@ function App() {
 
       <header className="header">
         <h1>Enterprise Neural Control Plane</h1>
-        <p>Live Multi-Agent AutoHeal Telemetry</p>
+        <p>Live Multi-Agent AutoHeal Broadcaster</p>
         <div className="metrics-dashboard" style={{ display: 'flex', gap: '2rem', justifyContent: 'center', marginTop: '1rem' }}>
           <div className="metric-card" style={{ background: '#1e293b', padding: '10px 20px', borderRadius: '8px', border: '1px solid #334155' }}>
             <div style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Errors Prevented</div>
@@ -224,9 +234,12 @@ function App() {
             <button className="btn btn-danger" onClick={handleRunGremlin} disabled={wsStatus !== 'connected'}>
               Run Chaos Test
             </button>
+            <button className="btn btn-success" onClick={() => window.open(prUrl, '_blank')} disabled={!prUrl} style={{ background: '#22c55e', borderColor: '#16a34a' }}>
+              View Live PR on GitHub
+            </button>
           </div>
 
-          <div className="panel-title" style={{marginTop: '1rem'}}> Live Telemetry Stream</div>
+          <div className="panel-title" style={{marginTop: '1rem'}}> Live Broadcaster Stream</div>
           <div className="terminal">
             {logs.map((log, i) => (
               <div key={i} className="log-entry">
@@ -234,7 +247,7 @@ function App() {
                 <span className={`log-msg ${log.type}`}>{log.msg}</span>
               </div>
             ))}
-            {logs.length === 0 && <div style={{color: '#666'}}>Awaiting telemetry stream...</div>}
+            {logs.length === 0 && <div style={{color: '#666'}}>Awaiting broadcaster stream...</div>}
             <div ref={terminalEndRef} />
           </div>
         </section>

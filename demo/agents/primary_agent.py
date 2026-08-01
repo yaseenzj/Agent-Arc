@@ -1,12 +1,11 @@
-from engine.telemetry import manager
+from engine.broadcaster import manager
 
 
 async def run_primary_agent(server):
     """
     Simulates the Primary Reasoning Asset Management Agent triggering a workflow.
-    It uses the outdated schema ("total_cents") which will cause a validation error.
     """
-    drifted_payload = {"user_id": "123", "total_cents": 500}
+    drifted_payload = {"user_id": 123, "amount_usd": 5.0}
     
     print("\n[PRIMARY AGENT] Calling tool 'update_crm' with payload:")
     print(f"                {drifted_payload}\n")

@@ -3,7 +3,7 @@ from collections.abc import Callable
 from typing import Any
 
 from engine.engine import engine
-from engine.telemetry import manager
+from engine.broadcaster import manager
 
 
 class AutoHealMiddleware:
