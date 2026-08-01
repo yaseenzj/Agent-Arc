@@ -5,7 +5,7 @@ async def run_primary_agent(server):
     """
     Simulates the Primary Reasoning Asset Management Agent triggering a workflow.
     """
-    drifted_payload = {"user_id": 123, "amount_usd": 5.0}
+    drifted_payload = {"user_id": 123, "total_cents": 5.0}
     
     print("\n[PRIMARY AGENT] Calling tool 'update_crm' with payload:")
     print(f"                {drifted_payload}\n")
