@@ -91,6 +91,9 @@ async def negotiate_vendor_swap(broken_tool: str, backup_tool: str, payload: dic
         {"role": "user", "content": prompt}
     ]
     
+    api_key = os.getenv("GROQ_API_KEY")
+    client = AsyncGroq(api_key=api_key)
+    
     response = await client.chat.completions.create(
         messages=messages,
         model="llama-3.1-8b-instant",

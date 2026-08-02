@@ -15,7 +15,7 @@ class ConnectionManager:
 
     async def broadcast(self, node: str, message: str, level: str = "info"):
         payload = {"node": node, "msg": message, "type": level}
-        # Copy list to avoid runtime errors if connections drop during broadcast
+        
         for connection in list(self.active_connections):
             try:
                 await connection.send_json(payload)

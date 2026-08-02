@@ -83,5 +83,5 @@ class AutoHealMiddleware:
                     original_executor=call_next
                 )
             else:
-                # If it's a completely unrelated error, let it crash normally.
+                
                 raise e

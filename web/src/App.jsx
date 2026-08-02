@@ -19,7 +19,7 @@ const initialNodes =[
   { id: 'engine', position: { x: 250, y: 250 }, data: { label: ' A2A Event Bus' } },
   
   { id: 'cache', position: { x: 250, y: 350 }, data: { label: ' Async Cache Check' } },
-  { id: 'llm', position: { x: 500, y: 350 }, data: { label: ' Local Ollama LLM' } },
+  { id: 'llm', position: { x: 500, y: 350 }, data: { label: ' Groq Llama 3.1 LPU' } },
   
   { id: 'transform', position: { x: 250, y: 450 }, data: { label: ' Apply Transformations' } },
   

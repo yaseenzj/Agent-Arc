@@ -15,7 +15,7 @@ async def run_stress_test_agent(server):
         {"user_id": "991", "amount_usd": 150},
         {"user_id": "992", "amount_usd": 420},
         {"user_id": "993", "amount_usd": 50},
-        {"user_id": "888", "amount_usd": 500} # NUCLEAR PAYLOAD: Triggers 500 Outage
+        {"user_id": "888", "amount_usd": 500} 
     ]
     
     async def attack(payload):
