@@ -35,7 +35,7 @@ We built a deterministic, zero-downtime interceptor that automatically traps the
 We built an incredible **Vite + React Flow** frontend to visualize this broadcaster stream in real time. 
 
 ### Action 1: The Concurrency Stress Test
-Click **"Run Chaos Test"** on the dashboard.
+Click **"Run Stress Test"** on the dashboard.
 - **What it does:** Fires 3 simultaneous, outdated payloads to simulate a high-traffic production crash.
 - **What to highlight to judges:** Point out how the UI beautifully traces the glowing cyan path. Show them the terminal logs proving that the `asyncio.Lock()` worked perfectly: it queried Groq exactly *once*, and served *Cache Hits* (0ms) from Postgres to the other concurrent requests, saving massive compute costs.
 

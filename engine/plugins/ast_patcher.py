@@ -93,10 +93,27 @@ class ASTPatchingAgent(AutoHealPlugin):
                     branch=branch_name
                 )
                 
+                # Format the delta for the PR body
+                delta_details = ""
+                for old_key, fix in delta.items():
+                    new_key = fix.get('key_mapping')
+                    math_mod = fix.get('value_math_modifier')
+                    delta_details += f"- Swapped outdated key `{old_key}` ➜ `{new_key}`\n"
+                    if math_mod:
+                        delta_details += f"- Applied mathematical transformation: `{math_mod}`\n"
+                
+                pr_body = (
+                    f"## 🛠️ AutoHeal Schema Fix\n\n"
+                    f"The AutoHeal proxy detected a **400 Bad Request** caused by schema drift in `{tool_name}`. "
+                    f"The payload was automatically intercepted and healed via **Llama 3.1**.\n\n"
+                    f"### Transformations Inferred:\n{delta_details}\n"
+                    f"*This PR applies the generated LibCST AST patch to fix the source code permanently.*"
+                )
+                
                 # Open the Pull Request
                 pr = repo.create_pull(
                     title=f"AutoHeal Patch: Schema Drift in {tool_name}",
-                    body="The AutoHeal proxy detected a 400 Bad Request caused by schema drift. The payload was automatically healed via Llama 3.1 and execution succeeded. This PR applies the LibCST AST patch to fix the source code permanently.",
+                    body=pr_body,
                     head=branch_name,
                     base="main"
                 )

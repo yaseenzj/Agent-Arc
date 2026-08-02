@@ -232,10 +232,10 @@ function App() {
               Run Primary Agent
             </button>
             <button className="btn btn-danger" onClick={handleRunGremlin} disabled={wsStatus !== 'connected'}>
-              Run Chaos Test
+              Run Stress Test
             </button>
             <button className="btn btn-success" onClick={() => window.open(prUrl, '_blank')} disabled={!prUrl} style={{ background: '#22c55e', borderColor: '#16a34a' }}>
-              View Live PR on GitHub
+              GitHub PR
             </button>
           </div>
 

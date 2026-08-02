@@ -10,7 +10,7 @@ async def run_stress_test_agent(server):
     """
     print("\n[STRESS TEST AGENT] Initiating Concurrency Attack on 'update_crm'...")
     
-    # The stress test sends a bunch of outdated payloads simultaneously
+
     payloads = [
         {"user_id": "991", "amount_usd": 150},
         {"user_id": "992", "amount_usd": 420},

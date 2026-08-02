@@ -19,14 +19,7 @@ async def run_primary_agent(server):
         print("\n[PRIMARY AGENT] Received successful result seamlessly:")
         print(f"                {result}\n")
         
-        print("\n" + "-"*60)
-        print("[PRIMARY AGENT] Making the exact same call again later...")
-        print("-"*60 + "\n")
-        
-        result2 = await server.call_tool("update_crm", drifted_payload)
-        
-        print("\n[PRIMARY AGENT] Received successful result seamlessly AGAIN:")
-        print(f"                {result2}\n")
+
         
     except Exception as e:
         print(f"\n[PRIMARY AGENT] CRASHED with error: {e}\n")
